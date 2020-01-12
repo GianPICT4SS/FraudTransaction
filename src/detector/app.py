@@ -24,9 +24,9 @@ FRAUD_TOPIC = os.environ.get('FRAUD_TOPIC')
 model = torch.load('model/model_1.pt')
 model.eval()
 
-def classify_transaction(input, model):
+def classify_transaction(transaction):
     """classify the transaction by using the pre-trained model"""
-    output = model(input)
+
     return transaction['Amount'] >= 900
 
 
