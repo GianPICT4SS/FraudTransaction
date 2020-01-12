@@ -1,4 +1,4 @@
-# Microservice FraudTransaction App:
+# FraudTransaction App:
 A real-time fraud transaction prediction model by using Kafka/Spark/Pytorch
 
 The system simulate a real world application by using two microservice isolated into two docker-compose configuration.
