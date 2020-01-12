@@ -1,11 +1,6 @@
 
 import argparse
-import time
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 
 import torch
 import torch.nn as nn
@@ -14,7 +9,6 @@ import torch.utils.data as data_utils
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter('runs/model_1')
 
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
@@ -36,17 +30,18 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Load data
 ########################################################
 
-df = pd.read_csv('../../files/dataset/creditcard.csv')
+df_x = pd.read_csv('../dataset/X_train.csv')
+df_y = pd.read_csv('../dataset/y_train.csv')
 
-X = df.iloc[:, :-1].values
-y = df.pop('Class').values
+print('dataset loaded')
+X_train = df_x.values
+y_train = df_y.values
 #y = y.apply(lambda x: 1 if x == 1 else -1)
 #y = y.values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=args.seed)
+
 
 sc = StandardScaler()
-
 X_train_sc = sc.fit_transform(X_train)
 
 
@@ -127,6 +122,9 @@ for i in range(training_epochs):
     writer.add_scalar('Train/Loss', loss.item(), i+1)
     writer.flush()
 
+
+# Test validation
+""""
 #################################################################################
 # Test validation
 #################################################################################
@@ -147,3 +145,7 @@ with torch.no_grad():
         correct += (predicted.double() == labels).sum().item()
 
 print(f'Accuracy of the network on the {X_test.shape[0]} inputs: {100*correct/total}%')
+"""
+
+# Save the model
+torch.save(net.state_dict(), 'model_1.pt')
