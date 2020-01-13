@@ -16,7 +16,7 @@ SLEEP_TIME = 1 / TRANSACTIONS_PER_SECOND
 ###########################################
 # Load Test Data
 ###########################################
-X_test = pd.read_csv('dataset/X_test.csv')
+X_test = pd.read_csv('dataset/test/X_test.csv')
 
 if __name__ == '__main__':
     producer = KafkaProducer(
@@ -29,4 +29,5 @@ if __name__ == '__main__':
         transaction = create_random_transaction(X_test)
         producer.send(TRANSACTIONS_TOPIC, value=transaction)
         print(transaction)  # DEBUG
-        sleep(SLEEP_TIME)
+        #sleep(SLEEP_TIME)
+        sleep(3)

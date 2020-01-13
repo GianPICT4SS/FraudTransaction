@@ -11,7 +11,7 @@ writer = SummaryWriter('runs/model_1')
 
 from sklearn.preprocessing import StandardScaler
 
-
+from utils.config import *
 
 
 parser = argparse.ArgumentParser(description='PyTorch FraudDetection')
@@ -26,25 +26,6 @@ torch.manual_seed(args.seed)
 
 #device = torch.device("cuda" if args.cuda else "cpu")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-########################################################
-# Load data
-########################################################
-
-df_x = pd.read_csv('../dataset/X_train.csv')
-df_y = pd.read_csv('../dataset/y_train.csv')
-
-print('dataset loaded')
-X_train = df_x.values
-y_train = df_y.values
-#y = y.apply(lambda x: 1 if x == 1 else -1)
-#y = y.values
-
-
-
-sc = StandardScaler()
-X_train_sc = sc.fit_transform(X_train)
-
-
 
 ######################################################
 # Simple Linear Model
@@ -69,6 +50,31 @@ class FraudNet(nn.Module):
         x = torch.sigmoid(self.fc5(x))
         return x
 
+
+
+"""
+########################################################
+# Load data
+########################################################
+
+#x_path = str(TRAIN) + '/X_train.csv'
+#y_path = str(TRAIN) + '/y_train.csv'
+df_x = pd.read_csv('../dataset/train/X_train.csv')
+df_y = pd.read_csv('/dataset/train/y_train.csv')
+
+print('dataset loaded')
+X_train = df_x.values
+y_train = df_y.values
+#y = y.apply(lambda x: 1 if x == 1 else -1)
+#y = y.values
+
+
+
+sc = StandardScaler()
+X_train_sc = sc.fit_transform(X_train)
+
+
+# Train
 net = FraudNet().double().to(device)
 
 
@@ -123,8 +129,7 @@ for i in range(training_epochs):
     writer.flush()
 
 
-# Test validation
-""""
+
 #################################################################################
 # Test validation
 #################################################################################
@@ -145,7 +150,8 @@ with torch.no_grad():
         correct += (predicted.double() == labels).sum().item()
 
 print(f'Accuracy of the network on the {X_test.shape[0]} inputs: {100*correct/total}%')
-"""
+
 
 # Save the model
 torch.save(net.state_dict(), 'model_1.pt')
+"""
