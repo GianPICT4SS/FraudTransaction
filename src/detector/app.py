@@ -1,5 +1,6 @@
 """detector app: it must classify a transaction as fraud or normal."""
 
+import os
 import json
 import logging
 import pickle
@@ -10,40 +11,108 @@ import torch
 from model.model_1 import FraudNet
 from kafka import KafkaConsumer, KafkaProducer
 
+import pyspark
+from pyspark.sql.session import SparkSession
+###################################################
+# Spark Configuration
+###################################################
+
+#sc = pyspark.SparkContext(master='local', appName='FraudTransaction')
+#spark = SparkSession(sc)
+
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
                     datefmt='%d/%m/%Y %H:%M ',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-
-MESSAGES_PATH = DETECTOR/'messages'
+print(f'Current Directory: {os.getcwd()}')
+MESSAGES_PATH = 'detector/messages'
 RETRAIN_EVERY = 150
 EXTRA_MODELS_TO_KEEP = 1
 TOPICS = [TRANSACTIONS_TOPIC, RETRAIN_TOPIC]
-column_order = pickle.load(open(DATA_PROCESSOR/'column_order.p', 'rb'))
-dataprocessor = None
+#path_co = str(DATA_PROCESSOR) + '/column_order.p'
+#with open(path_co, 'rb') as f:
+#    column_order = pickle.load(f)
+#column_order = sc.pickleFile('dataset/dataprocessor/column_order.p')
+
+
+#dataprocessor = None
 consumer = None
 model = None
 
 ####################################
 # Load Pytorch Model
 ####################################
-if not torch.cuda.is_available():
-    model = FraudNet()
-    model = model.load_state_dict(torch.load(MODELS/'model_1.pt', map_location=torch.device('cpu')))
-    model.eval()
 
+model = FraudNet()
+
+def load_checkpoint(filepath, device='cpu'):
+    if device == 'cpu':
+        checkpoint = torch.load(filepath, map_location=torch.device('cpu'))
+        model = checkpoint['model']
+        model.load_state_dict(checkpoint['state_dict'])
+        for parameter in model.parameters():
+            parameter.requires_grad = False
+        model.eval()
+        return model
+    elif device == 'gpu':
+        device = torch.device('cuda')
+        checkpoint = torch.load(filepath)
+        model = checkpoint['model']
+        model.load_state_dict(checkpoint['state_dict'])
+        for parameter in model.parameters():
+            parameter.requires_grad = False
+        model.to(device)
+        model.eval()
+        return model
+
+
+logger.info('Loading the Pytorch Model...')
+model = load_checkpoint(MODELS/'checkpoint_1.pth')
+
+
+
+"""
+
+if not torch.cuda.is_available():
+
+    model = load_checkpoint(MODELS/'checkpoint_1.pth')
+    device = torch.device('cpu')
+    model.to(device)
+    #model = model.load_state_dict(torch.load(MODELS/'model_1.pt', map_location=torch.device('cpu')))
+    #state_dict = torch.load(MODELS/ 'model_1.pth', map_location=device)
+    #print(f'TYPE: {type(state_dict)}')
+    #for key, values in state_dict.items():
+    #    print(key, values)
+    #model = model.load_state_dict(state_dict)
+    #model.eval()
+    #try:
+    #    logger.info('model.eval() OK')
+    #    model.eval()
+    #except Exception as e:
+    #    logger.info(f'{e}')
+    #    pass
 else:
-    model = FraudNet()
-    model = model.load_state_dict(torch.load(MODELS/'model_1.pt'))
-    model.eval()
+    device = torch.device('cuda')
+    state_dict = torch.load(MODELS / 'model_1.pth')
+    model = model.load_state_dict(torch.load(state_dict))
+    model.to(device)
+    try:
+        model.eval()
+    except:
+        pass
+"""
+
 
 
 
 def reload_model(path):
     """this method allows to reload a new model, when it is available (due to the retraining action)"""
-    return pickle.load(open(path, 'rb'))
+    #return sc.pickleFile(path)
+    with open(str(path), 'rb') as f:
+        return pickle.loads(f)
 
 def is_retraining_message(msg):
     """This method allows the detector to know if a new model is available by reading a msg from a topic.
@@ -58,6 +127,7 @@ def is_application_message(msg):
 
 def predict(message):
     """classify the transaction by using the pre-trained model"""
+
 
     pass
 
@@ -89,9 +159,13 @@ def start(model_id, messages_count, batch_id):
 
 if __name__ == '__main__':
 
+    """
     dataprocessor_id = 0
-    dataprocessor_fname = 'dataprocessor_{}_.p'.format(dataprocessor_id)
-    dataprocessor = pickle.load(open(DATA_PROCESSOR / dataprocessor_fname, 'rb'))
+    dataprocessor_fname = f'dataprocessor_{dataprocessor_id}_.p'
+    path_dp = str(DATA_PROCESSOR) + '/' + dataprocessor_fname
+    with open(path_dp, 'rb') as f:
+        dataprocessor = pickle.load(f)
+    #dataprocessor = sc.pickleFile(dataprocessor_fname)
 
     messages_count = read_messages_count(MESSAGES_PATH, RETRAIN_EVERY)
     batch_id = messages_count % RETRAIN_EVERY
@@ -99,8 +173,39 @@ if __name__ == '__main__':
     model_id = batch_id % (EXTRA_MODELS_TO_KEEP + 1)
     model_fname = 'model_{}_.p'.format(model_id)
     model = reload_model(MODELS / model_fname)
-
+    
+    """
     consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
     consumer.subscribe(TOPICS)
 
-    start(model_id, messages_count, batch_id)
+    #start(model_id, messages_count, batch_id)
+    import pandas as pd
+    import numpy as np
+
+    for msg in consumer:
+        msg = msg.value
+        print(f'Before msg_type {type(msg)}, len: {len(msg)}, type_ : {type(msg[0])}')
+        msg = json.loads(msg) # List[0] = string
+        print(f'After msg_type {type(msg)}, len: {len(msg)}, type_ : {type(msg[0])}')
+        msg = json.dumps(msg[0])
+        msg = json.loads(msg)  # ancora una stringa
+        print(f'After msg_type {type(msg)}, len: {len(msg)}, type_ : {type(msg[0])}')
+
+
+
+
+        print(f'value: {msg}, type: {type(msg)}')  # Class str
+
+
+        #print(f'dirct: {dict_row}, type:{type(dict_row)}')
+        row = np.array(([list(item.values()) for item in msg.values()]))
+        #df = pd.DataFrame(msg)
+        #row = np.asarray(df.values)
+        print(f'ROW: {row}, type: {type(row)}')
+        row = row.reshape(row.shape[0], 1)
+        row = torch.from_numpy(row).double()
+        # Try prediction
+        output = model(row)
+        _, predicted = torch.max(output.data, 1)
+        print('#####################################################')
+        print(f'prediction:{predicted}')

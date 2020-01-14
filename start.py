@@ -28,42 +28,46 @@ args = parser.parse_args()
 
 def create_folder():
     logger.info('Creating directory structure...')
-    GENERATOR.mkdir(exist_ok=True)
-    DETECTOR.mkdir(exist_ok=True)
-    TRAIN.mkdir(exist_ok=True)
-    TEST.mkdir(exist_ok=True)
-    MODELS.mkdir(exist_ok=True)
-    DATA_PROCESSOR.mkdir(exist_ok=True)
+    GENERATOR_start.mkdir(exist_ok=True)
+    DETECTOR_start.mkdir(exist_ok=True)
+    TRAIN_start.mkdir(exist_ok=True)
+    TEST_start.mkdir(exist_ok=True)
+    MODELS_start.mkdir(exist_ok=True)
+    #DATA_PROCESSOR_start.mkdir(exist_ok=True)
 
-def download_data():
+def download_data(train_size=0.8):
 
     logger.info('Downloading data...')
-    df = pd.read_csv('files/creditcard.csv')
-    X = df.iloc[:, :-1]
-    y = df.pop('Class')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=args.seed)
 
-    X_train['Class'] = y_train
-    X_test['Class'] = y_test
+    df = pd.read_csv('files/creditcard.csv')
+    N_train = int(df.shape[0]*train_size)
+    df_train = df.iloc[:N_train, :]
+    df_test = df.iloc[N_train:, :]
+
+    print('before')
+    print(f'dfTrain_shape: {df_train.shape}, dfTest_shape:{df_test.shape}')
+
+    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=args.seed)
+
     logger.info('Creating train dataset.')
-    X_train.to_csv(str(TRAIN) + '/X_train.csv')
-    #y_train.to_csv(str(TRAIN) + '/y_train.csv', header=False)
-    #y_test.to_csv(str(TRAIN) + '/y_test.csv', header=False)
+    df_train.to_csv(str(TRAIN_start) + '/df_train.csv', index=False)
+    df_test.to_csv(str(TRAIN_start) + '/df_test.csv', index=False)
 
     logger.info('Creating test dataset.')
-    X_test.to_csv(str(TEST) + '/X_test.csv')
+    df_test.to_csv(str(TEST_start) + '/df_test.csv', index=False)
+
 
 def create_data_processor():
     logger.info("creating preprocessor...")
 
-    dataprocessor = build_train(str(TRAIN/'X_train.csv'), str(DATA_PROCESSOR))
+    dataprocessor = build_train(str(TRAIN_start/'X_train.csv')) #str(DATA_PROCESSOR_start))
     return dataprocessor
 
 if __name__ == '__main__':
 
-    #create_folder()
-    #download_data()
-    dataprocessor = create_data_processor()
+    create_folder()
+    df = download_data()
+    #dataprocessor = create_data_processor()
 
 
 

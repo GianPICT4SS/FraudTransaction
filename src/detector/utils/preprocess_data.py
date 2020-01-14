@@ -50,7 +50,8 @@ def load_new_training_data(path):
         df = pd.DataFrame(data)  # so that hasattr(df, columns)
     return spark.createDataFrame(df)
 
-def build_train(train_path,result_path, dataprocessor_id=0, PATH_2=None):
+def build_train(train_path, PATH_2=None): #result_path, dataprocessor_id=0, PATH_2=None):
+
 
     target ='Class'
     #read initial DataFrame
@@ -61,7 +62,8 @@ def build_train(train_path,result_path, dataprocessor_id=0, PATH_2=None):
         .load(train_path)
 
 
-    if PATH_2:  # new train data available
+    # new train data available?
+    if PATH_2:
         df_tmp = load_new_training_data(PATH_2)
         #in order to be consistent with df
         df_tmp = df_tmp[df.columns]
@@ -73,7 +75,7 @@ def build_train(train_path,result_path, dataprocessor_id=0, PATH_2=None):
     # UDF for converting columns type from vector to double type
     #unlist = udf(lambda x: round(float(list(x)[0]), 3), tp.DoubleType())
     preprocessor = FeatureTools()
-    logger.info(f'Preprocessing Data: {df.columns}')
+    logger.info('Preprocessing Data')
     #df = df.withColumn(column, unlist(column))
     dataprocessor = preprocessor.fit(
             df,
@@ -81,16 +83,30 @@ def build_train(train_path,result_path, dataprocessor_id=0, PATH_2=None):
             df.columns,
             StandardScaler(inputCol="features", outputCol='features'+'_scd')
             )
+    #logger.info(f'dataprocessor type: {type(dataprocessor)}')
 
+
+
+    """Since we use pyspark as preprocessing it is not possible to save only python object that contains spark rdd
+    as attribute. So, for the moment each time we have a new row to be classify we have to standardize it so we need
+    mean and std of the train dataset...
+    
     dataprocessor_fname = f'dataprocessor_{dataprocessor_id}.p'
-    fname = str(result_path) + '/' + dataprocessor_fname
-    # Save dataprocessor object as Pickle File
-    df.rdd.saveAsPickleFile(fname)
+    fpath = str(result_path) + '/' + dataprocessor_fname
 
-    if dataprocessor_id == 0:
-        logger.info(f'Save column_order.p in: {result_path}')
-        fname = str(result_path) + '/column_order.p'
-        df.rdd.saveAsPickleFile(fname)
+    
+    # Save dataprocessor object as Pickle File
+    #df.rdd.saveAsPickleFile(fname)
+    #with open(fpath, 'wb') as f:
+        #pickle.dump(dataprocessor, f)
+
+
+    #if dataprocessor_id == 0:
+     #   logger.info(f'Save column_order.p in: {result_path}')
+      #  fpath = str(result_path) + '/column_order.p'
+       # with open(fpath, 'wb') as f:
+        #    pickle.dump(dataprocessor, f)
+     """
 
     return dataprocessor
 

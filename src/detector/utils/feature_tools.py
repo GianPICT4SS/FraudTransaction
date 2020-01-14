@@ -20,7 +20,8 @@ class FeatureTools():
         assembler = VectorAssembler().setInputCols(df_in.columns).setOutputCol("features")
         transformed = assembler.transform(df_in)
         scaledModel = sc.fit(transformed.select("features"))
-        df_scaled = scaledModel.transform(transformed)  # TO DO: add possibility to scale only specific features.
+        df_scaled = scaledModel.transform(transformed) # TO DO: add possibility to scale only specific features.
+
         return df_scaled, scaledModel
 
     @staticmethod
@@ -44,8 +45,8 @@ class FeatureTools():
 
         df, self.sc = self.normalize_features(df_inp, numerical_columns, sc)
 
-        self.target = df.select(target_col)
-        self.data = df.drop(target_col)
+        self.target = df.select(target_col).rdd
+        self.data = df.drop(target_col).rdd
         self.colnames = df.columns
 
         return self

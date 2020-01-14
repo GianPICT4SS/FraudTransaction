@@ -1,6 +1,7 @@
 
 import argparse
 import pandas as pd
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -11,7 +12,7 @@ writer = SummaryWriter('runs/model_1')
 
 from sklearn.preprocessing import StandardScaler
 
-from utils.config import *
+
 
 
 parser = argparse.ArgumentParser(description='PyTorch FraudDetection')
@@ -52,22 +53,25 @@ class FraudNet(nn.Module):
 
 
 
-"""
+
 ########################################################
 # Load data
 ########################################################
+"""
 
 #x_path = str(TRAIN) + '/X_train.csv'
 #y_path = str(TRAIN) + '/y_train.csv'
-df_x = pd.read_csv('../dataset/train/X_train.csv')
-df_y = pd.read_csv('/dataset/train/y_train.csv')
+df_train = pd.read_csv('../dataset/train/df_train.csv')
+
+df_x = df_train.iloc[:, :-1]
+df_y = df_train.pop('Class')
+
 
 print('dataset loaded')
-X_train = df_x.values
-y_train = df_y.values
-#y = y.apply(lambda x: 1 if x == 1 else -1)
-#y = y.values
-
+X_train = np.asarray(df_x.values)
+y_train = np.asarray(df_y.values)
+y_train = y_train.reshape(y_train.shape[0], 1)
+print(f'Before: X_train.shape = {X_train.shape}, y_train.shape: {y_train.shape}')
 
 
 sc = StandardScaler()
@@ -80,6 +84,8 @@ net = FraudNet().double().to(device)
 
 X_train_sc = torch.from_numpy(X_train_sc).double().to(device)
 y_train = torch.from_numpy(y_train).double().to(device)
+print('after torh.from_numpy')
+print(f'X_train.shape = {X_train.shape}, y_train.shape: {y_train.shape}')
 
 # Binary-Cross-Error loss (it requires the sigmoid's output as input)
 criterion = nn.BCELoss()
@@ -92,6 +98,7 @@ minibatch_size = 64
 train = data_utils.TensorDataset(X_train_sc, y_train)
 train_loader = data_utils.DataLoader(train, batch_size=minibatch_size, shuffle=True)
 # add network graph to tensorboard
+print(f'Adding network: X_train_sc[0].shape: {X_train_sc[0].shape}')
 writer.add_graph(net, X_train_sc[0])
 writer.close()
 
@@ -130,6 +137,16 @@ for i in range(training_epochs):
 
 
 
+ # Save the model
+checkpoint = {'model': FraudNet(),
+          'state_dict': net.state_dict(),
+          'optimizer' : optimizer.state_dict()}
+
+torch.save(checkpoint, 'models/checkpoint_1.pth')
+"""
+
+
+"""
 #################################################################################
 # Test validation
 #################################################################################
@@ -150,8 +167,4 @@ with torch.no_grad():
         correct += (predicted.double() == labels).sum().item()
 
 print(f'Accuracy of the network on the {X_test.shape[0]} inputs: {100*correct/total}%')
-
-
-# Save the model
-torch.save(net.state_dict(), 'model_1.pt')
 """

@@ -6,15 +6,21 @@ from pathlib import Path
 
 
 # Path directory to be created for the dataset
-path_gen = Path('src/generator')
-path_det = Path('src/detector')
+path_gen_start = Path('src/generator')
+path_det_start = Path('src/detector')
 
-GENERATOR = path_gen/'dataset'
-TEST = GENERATOR/'test'
-DETECTOR = path_det/'dataset'
-TRAIN = DETECTOR/'train'
+path_det = Path('./')
+path_gen = Path('./')
+
+GENERATOR_start = path_gen_start/'dataset'
+TEST_start = GENERATOR_start/'test'
+DETECTOR_start = path_det_start/'dataset'
+TRAIN_start = DETECTOR_start/'train'
+MODELS_start = path_det_start/'model/models'
+DATA_PROCESSOR_start = path_det_start/'dataset/dataprocessor'
+
 MODELS = path_det/'model/models'
-DATA_PROCESSOR = DETECTOR/'dataprocessor'
+DATA_PROCESSOR = path_det/'dataset/dataprocessor'
 
 # Global Variables
 KAFKA_BROKER_URL = os.environ.get('KAFKA_BROKER_URL')
