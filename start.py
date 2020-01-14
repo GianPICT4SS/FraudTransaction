@@ -43,17 +43,19 @@ def download_data():
     y = df.pop('Class')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=args.seed)
 
-
+    X_train['Class'] = y_train
+    X_test['Class'] = y_test
     logger.info('Creating train dataset.')
     X_train.to_csv(str(TRAIN) + '/X_train.csv')
-    y_train.to_csv(str(TRAIN) + '/y_train.csv', header=False)
-    y_test.to_csv(str(TRAIN) + '/y_test.csv', header=False)
+    #y_train.to_csv(str(TRAIN) + '/y_train.csv', header=False)
+    #y_test.to_csv(str(TRAIN) + '/y_test.csv', header=False)
 
     logger.info('Creating test dataset.')
     X_test.to_csv(str(TEST) + '/X_test.csv')
 
 def create_data_processor():
     logger.info("creating preprocessor...")
+
     dataprocessor = build_train(str(TRAIN/'X_train.csv'), str(DATA_PROCESSOR))
     return dataprocessor
 

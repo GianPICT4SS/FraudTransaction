@@ -1,4 +1,5 @@
-"""utils scripts for preprocessing data by using method of the class FeatureTools"""
+"""utils scripts for preprocessing data by using method of the class FeatureTools
+N.B pyspark works with Java 8, so it's necessary to have Java 8 installed and using this version."""
 
 import json
 import pickle
@@ -20,6 +21,7 @@ from pyspark.ml import Pipeline
 from pyspark.ml.feature import StandardScaler
 from pyspark.sql import Row, Column
 from pyspark.sql.functions import udf
+
 
 warnings.filterwarnings("ignore")
 ###################################################
@@ -48,40 +50,47 @@ def load_new_training_data(path):
         df = pd.DataFrame(data)  # so that hasattr(df, columns)
     return spark.createDataFrame(df)
 
-def build_train(train_path, result_path, dataprocessor_id=0, PATH_2=None):
+def build_train(train_path,result_path, dataprocessor_id=0, PATH_2=None):
 
     target ='Class'
     #read initial DataFrame
     #df = spark.read.csv(train_path, header=True, schema=my_schema)
-    df = spark.read.csv(train_path, header=True)
+    #df = spark.read.csv(train_path, header=True)
+    df = spark.read.format("csv")\
+        .options(header='true', inferschema='true')\
+        .load(train_path)
 
-    if PATH_2:
+
+    if PATH_2:  # new train data available
         df_tmp = load_new_training_data(PATH_2)
         #in order to be consistent with df
         df_tmp = df_tmp[df.columns]
         # concatenate for a new DataFrame
         df = df.union(df_tmp)
-        #ALERT: save on Disk, this operation could be dangerous for Big Amount of Data
+        #ALERT: save on Disk. This operation could be dangerous for Big Amount of Data
         df.write.csv(train_path)
 
-    # UDF for converting clumns type from vector to double type
-    unlist = udf(lambda x: round(float(list(x)[0]), 3), tp.DoubleType())
+    # UDF for converting columns type from vector to double type
+    #unlist = udf(lambda x: round(float(list(x)[0]), 3), tp.DoubleType())
     preprocessor = FeatureTools()
     logger.info(f'Preprocessing Data: {df.columns}')
-    for column in df.columns:
-        df = df.withColumn(column, unlist(column))
-        dataprocessor = preprocessor.fit(
-                df,
-                target,
-                df.columns,
-                StandardScaler(inputCol=column, outputCol=column+'_scd')
+    #df = df.withColumn(column, unlist(column))
+    dataprocessor = preprocessor.fit(
+            df,
+            target,
+            df.columns,
+            StandardScaler(inputCol="features", outputCol='features'+'_scd')
             )
 
     dataprocessor_fname = f'dataprocessor_{dataprocessor_id}.p'
-    pickle.dump(dataprocessor, open(result_path/dataprocessor_fname, "wb"))
+    fname = str(result_path) + '/' + dataprocessor_fname
+    # Save dataprocessor object as Pickle File
+    df.rdd.saveAsPickleFile(fname)
+
     if dataprocessor_id == 0:
         logger.info(f'Save column_order.p in: {result_path}')
-        pickle.dump(df.columns[:-1], open(result_path / 'column_order.p', "wb"))
+        fname = str(result_path) + '/column_order.p'
+        df.rdd.saveAsPickleFile(fname)
 
     return dataprocessor
 

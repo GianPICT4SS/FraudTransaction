@@ -1,5 +1,5 @@
 import copy
-
+from pyspark.ml.feature import VectorAssembler
 
 
 
@@ -10,15 +10,17 @@ class FeatureTools():
     def normalize_features(df_in, cols, sc):
         """
 
-        :param df: Pandas.DataFrame
+        :param df: pyspark.sql.dataframe.DataFrame
         :param cols: list of columns to be scaled
         :param sc: Standard Scaler (from pyspark.ml.feature, sklearn.preprocessing or similar)
 
         :return: df: Pandas.DataFrame, sc: trained scaler
         """
         #df = df_in.copy()
-        scaledModel = sc.fit(df_in[cols])
-        df_scaled = scaledModel.transform(df_in[cols])  # TO DO: add possibility to scale only specific features.
+        assembler = VectorAssembler().setInputCols(df_in.columns).setOutputCol("features")
+        transformed = assembler.transform(df_in)
+        scaledModel = sc.fit(transformed.select("features"))
+        df_scaled = scaledModel.transform(transformed)  # TO DO: add possibility to scale only specific features.
         return df_scaled, scaledModel
 
     @staticmethod
@@ -30,7 +32,7 @@ class FeatureTools():
     def fit(self, df_inp, target_col, numerical_columns, sc):
         """
 
-        :param df_inp: Pandas.DataFrame
+        :param df_inp: pyspark.sql.dataframe.DataFrame
         :param target_col: str
         :param numerical_columns: list with the numerical columns
         :param sc: Scaler, from pyspark.ml.feature or similar
@@ -42,16 +44,16 @@ class FeatureTools():
 
         df, self.sc = self.normalize_features(df_inp, numerical_columns, sc)
 
-        self.target = df.drop(target_col, axis=1, inplace=True)
-        self.data = df
-        self.colnames = df.columns.to_list()
+        self.target = df.select(target_col)
+        self.data = df.drop(target_col)
+        self.colnames = df.columns
 
         return self
 
     def transform(self, df_inp, trained_sc=None):
         """
 
-        :param df_inp: Pandas.DataFrame
+        :param df_inp: pyspark.sql.dataframe.DataFrame
         :param trained_sc: Scaler, from pyspark.ml.features or similar
 
         :return:  df: Pandas.DataFrame: transformed DataFrame
