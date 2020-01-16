@@ -1,7 +1,9 @@
-
+""" Deep-Neural Network model: from this script the first model is created and the checkpoint is saved for future
+prediction
+"""
 import argparse
 import pandas as pd
-import numpy as np
+
 
 import torch
 import torch.nn as nn
@@ -24,8 +26,6 @@ args = parser.parse_args()
 # Set the random seed manually for reproducibility.
 torch.manual_seed(args.seed)
 
-
-#device = torch.device("cuda" if args.cuda else "cpu")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ######################################################
@@ -57,19 +57,20 @@ class FraudNet(nn.Module):
 ########################################################
 # Load data
 ########################################################
-"""
 
-#x_path = str(TRAIN) + '/X_train.csv'
-#y_path = str(TRAIN) + '/y_train.csv'
+"""
 df_train = pd.read_csv('../dataset/train/df_train.csv')
+df_test = pd.read_csv('../dataset/train/df_test.csv')
 
 df_x = df_train.iloc[:, :-1]
 df_y = df_train.pop('Class')
 
+df_xT = df_test.iloc[:, :-1]
+df_yT = df_test.pop('Class')
 
 print('dataset loaded')
-X_train = np.asarray(df_x.values)
-y_train = np.asarray(df_y.values)
+X_train = df_x.values
+y_train = df_y.values
 y_train = y_train.reshape(y_train.shape[0], 1)
 print(f'Before: X_train.shape = {X_train.shape}, y_train.shape: {y_train.shape}')
 
@@ -78,14 +79,10 @@ sc = StandardScaler()
 X_train_sc = sc.fit_transform(X_train)
 
 
-# Train
+# network model object
 net = FraudNet().double().to(device)
-
-
 X_train_sc = torch.from_numpy(X_train_sc).double().to(device)
 y_train = torch.from_numpy(y_train).double().to(device)
-print('after torh.from_numpy')
-print(f'X_train.shape = {X_train.shape}, y_train.shape: {y_train.shape}')
 
 # Binary-Cross-Error loss (it requires the sigmoid's output as input)
 criterion = nn.BCELoss()
@@ -112,6 +109,10 @@ for i in range(training_epochs):
         inputs, labels = data
         labels = labels.reshape(labels.shape[0], 1)
         y_pred = net(inputs)
+        _, predicted = torch.max(y_pred.data, 1)
+        if predicted.sum().item() != 0:
+            print(f'fraud: {predicted.float()}')
+
 
         loss = criterion(y_pred, labels)  # y_pred, labels must be the same shape.
         running_loss += loss.item()
@@ -142,14 +143,20 @@ checkpoint = {'model': FraudNet(),
           'state_dict': net.state_dict(),
           'optimizer' : optimizer.state_dict()}
 
-torch.save(checkpoint, 'models/checkpoint_1.pth')
-"""
+torch.save(checkpoint, 'models/checkpoint_0.pth')
 
 
-"""
+
+
 #################################################################################
 # Test validation
 #################################################################################
+
+
+X_test = df_xT.values
+y_test = df_yT.values
+y_test = y_test.reshape(y_test.shape[0], 1)
+
 X_test = torch.from_numpy(X_test).double().to(device)
 y_test = torch.from_numpy(y_test).double().to(device)
 
@@ -163,8 +170,12 @@ with torch.no_grad():
         inputs, labels = data
         outputs = net(inputs)
         _, predicted = torch.max(outputs.data, 1)
+
+        if predicted.sum().item() != 0:
+            print(f'Fraud: {predicted.float()}')
         total += labels.size(0)
         correct += (predicted.double() == labels).sum().item()
 
 print(f'Accuracy of the network on the {X_test.shape[0]} inputs: {100*correct/total}%')
+
 """

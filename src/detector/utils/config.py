@@ -18,13 +18,19 @@ DETECTOR_start = path_det_start/'dataset'
 TRAIN_start = DETECTOR_start/'train'
 MODELS_start = path_det_start/'model/models'
 DATA_PROCESSOR_start = path_det_start/'dataset/dataprocessor'
-
+MESSAGES_PATH_start = path_det_start/'dataset/messages'
 MODELS = path_det/'model/models'
 DATA_PROCESSOR = path_det/'dataset/dataprocessor'
+MESSAGES_PATH = path_det/'dataset/messages'
 
-# Global Variables
+# KAFKA BROKER
 KAFKA_BROKER_URL = os.environ.get('KAFKA_BROKER_URL')
+
+
+# TOPIC
 TRANSACTIONS_TOPIC = os.environ.get('TRANSACTIONS_TOPIC')
 RETRAIN_TOPIC = os.environ.get('RETRAIN_TOPIC')
 LEGIT_TOPIC = os.environ.get('LEGIT_TOPIC')
 FRAUD_TOPIC = os.environ.get('FRAUD_TOPIC')
+
+

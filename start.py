@@ -34,6 +34,7 @@ def create_folder():
     TEST_start.mkdir(exist_ok=True)
     MODELS_start.mkdir(exist_ok=True)
     #DATA_PROCESSOR_start.mkdir(exist_ok=True)
+    MESSAGE_PATH_start.mkdir(exist_ok=True)
 
 def download_data(train_size=0.8):
 
@@ -66,7 +67,7 @@ def create_data_processor():
 if __name__ == '__main__':
 
     create_folder()
-    df = download_data()
+    #df = download_data()
     #dataprocessor = create_data_processor()
 
 
