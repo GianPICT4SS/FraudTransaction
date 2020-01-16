@@ -7,6 +7,8 @@ services:
     environment:
       KAFKA_BROKER_URL: broker:9092
       TRANSACTIONS_TOPIC: queueing.transactions
+      LEGIT_TOPIC: queueing.transactions.legit
+      FRAUD_TOPIC: queueing.transactions.fraud
       TRANSACTIONS_PER_SECOND: 1000
 
   detector:
@@ -15,8 +17,8 @@ services:
       KAFKA_BROKER_URL: broker:9092
       TRANSACTIONS_TOPIC: queueing.transactions
       RETRAIN_TOPIC: streaming.transactions.retrain
-      LEGIT_TOPIC: streaming.transactions.legit
-      FRAUD_TOPIC: streaming.transactions.fraud
+      LEGIT_TOPIC: queueing.transactions.legit
+      FRAUD_TOPIC: queueing.transactions.fraud
 
 networks:
   default:

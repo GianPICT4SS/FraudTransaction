@@ -1,7 +1,6 @@
 """Utilities for generating fakes transactions."""
 
 import random
-import json
 
 def create_random_transaction(df):
     """Create a fake, randomised transaction."""

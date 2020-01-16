@@ -7,10 +7,12 @@ import pandas as pd
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.data as data_utils
 from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter('runs/model_1')
+writer = SummaryWriter('runs/model_0')
+
+from model.fraud_net import FraudNet
+
 
 from sklearn.preprocessing import StandardScaler
 
@@ -27,38 +29,11 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-######################################################
-# Simple Linear Model
-######################################################
-
-class FraudNet(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-        self.fc1 = nn.Linear(30, 16)
-        self.fc2 = nn.Linear(16, 18)
-        self.fc3 = nn.Linear(18, 20)
-        self.fc4 = nn.Linear(20, 24)
-        self.fc5 = nn.Linear(24, 1)
-
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.dropout(x, p=0.25)
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = torch.sigmoid(self.fc5(x))
-        return x
-
-
-
-
 ########################################################
 # Load data
 ########################################################
 
-"""
+
 df_train = pd.read_csv('../dataset/train/df_train.csv')
 df_test = pd.read_csv('../dataset/train/df_test.csv')
 
@@ -152,7 +127,7 @@ torch.save(checkpoint, 'models/checkpoint_0.pth')
 # Test validation
 #################################################################################
 
-
+"""
 X_test = df_xT.values
 y_test = df_yT.values
 y_test = y_test.reshape(y_test.shape[0], 1)
@@ -177,5 +152,4 @@ with torch.no_grad():
         correct += (predicted.double() == labels).sum().item()
 
 print(f'Accuracy of the network on the {X_test.shape[0]} inputs: {100*correct/total}%')
-
 """
