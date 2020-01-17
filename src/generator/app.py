@@ -20,9 +20,9 @@ TOPICS = [FRAUD_TOPIC, LEGIT_TOPIC]
 ###########################################
 # Load Test Data
 ###########################################
-df_test = pd.read_csv('dataset/test/df_test.csv')
-X_test = df_test.iloc[:, :-1]
-N = X_test.shape[0]
+df_test = pd.read_csv('dataset/test/df_test.csv')  # sending also the label (in real-world case it is different)
+#X_test = df_test.iloc[:, :-1]
+N = df_test.shape[0]
 
 
 def start_producer():
@@ -33,14 +33,15 @@ def start_producer():
 
     logger.info('Transaction Payload:')
     for i in range(N):
-        transaction = create_random_transaction(X_test)
+        transaction = create_random_transaction(df_test)
         producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
         producer.flush()
         print(transaction)
-        #dockesleep(SLEEP_TIME)
+        sleep(5)
+    logger.info('Start producer finished.')
 
 def start_consumer():
-    logger.info('Start COnsumer Thread')
+    logger.info('Start Consumer Thread')
     consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
     consumer.subscribe(TOPICS)
 

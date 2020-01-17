@@ -20,6 +20,8 @@ services:
       LEGIT_TOPIC: queueing.transactions.legit
       FRAUD_TOPIC: queueing.transactions.fraud
 
+
+
 networks:
   default:
     external:

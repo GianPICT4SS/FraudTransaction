@@ -11,7 +11,7 @@ import torch.utils.data as data_utils
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter('runs/model_0')
 
-from model.fraud_net import FraudNet
+from utils.fraud_net import FraudNet
 
 
 from sklearn.preprocessing import StandardScaler

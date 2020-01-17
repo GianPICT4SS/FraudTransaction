@@ -9,8 +9,6 @@ def create_random_transaction(df):
     index = random.randint(0, shape_x-1)
     transaction = df.iloc[index:index+1, :]
     #transaction['json'] = transaction.apply(lambda x: x.to_json(), axis=1)
-    #msg = transaction.json.to_list()
-    #msg = transaction.json.to_list()
     msg = transaction.to_dict('list')
     #msg = json.dumps(msg)
     return msg

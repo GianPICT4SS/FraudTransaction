@@ -55,14 +55,10 @@ def build_train(train_path, PATH_2=None): #result_path, dataprocessor_id=0, PATH
 
     target ='Class'
     #read initial DataFrame
-    #df = spark.read.csv(train_path, header=True, schema=my_schema)
-    #df = spark.read.csv(train_path, header=True)
     df = spark.read.format("csv")\
         .options(header='true', inferschema='true')\
         .load(train_path)
-
-
-    # new train data available?
+ # new train data available?
     if PATH_2:
         df_tmp = load_new_training_data(PATH_2)
         #in order to be consistent with df

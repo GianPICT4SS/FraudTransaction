@@ -1,10 +1,14 @@
 import json
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
+                    datefmt='%d/%m/%Y %H:%M ',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 import pandas as pd
 
 from utils.config import *
 from kafka import KafkaProducer
 
-logger = logging.getLogger(__name__)
 
 producer = KafkaProducer(bootstrap_servers=KAFKA_BROKER_URL)
 

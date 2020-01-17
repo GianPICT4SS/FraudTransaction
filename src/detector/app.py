@@ -3,17 +3,23 @@ in the message_utils script."""
 
 import time
 import json
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
+                    datefmt='%d/%m/%Y %H:%M ',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 import pandas as pd
 
 
 from utils.config import *
-from utils.messages_utils import append_message, read_messages_count, send_retrain_message, publish_prediction
+from utils.messages_utils import append_message, read_messages_count, publish_prediction
 import torch
-from model.fraud_net import FraudNet
+from utils.fraud_net import FraudNet
 from kafka import KafkaConsumer
 
-logger = logging.getLogger(__name__)
 
+
+from model.trainer import Trainer
 
 RETRAIN_EVERY = 250
 EXTRA_MODELS_TO_KEEP = 1
@@ -83,7 +89,7 @@ def start(model_id, messages_count, batch_id):
         if is_retraining_message(msg):
             # A new model is available
             model_fname = f'model_{model_id}.pt'
-            #model = load_checkpoint(MODELS/model_fname)
+            model = load_checkpoint(MODELS/model_fname)
             logger.info(f'New model reloaded {model_id}')
 
         elif is_application_message(msg):
@@ -91,10 +97,14 @@ def start(model_id, messages_count, batch_id):
             publish_prediction(pred) # publish prediction msg
             append_message(message, MESSAGES_PATH, batch_id)  # save the transaction in order to increase the train dataset
             messages_count += 1
-            if messages_count == RETRAIN_EVERY:  # send retrain message. It means, a new model could be retrained.
+            if messages_count % RETRAIN_EVERY == 0:
+                # TO DO: here start the thread trainer, its run method starts the retrain
+                # trainer(model_id, batch_id)
                 model_id = (model_id + 1) % (EXTRA_MODELS_TO_KEEP + 1)
-                send_retrain_message(model_id, batch_id)
                 batch_id += 1
+                Trainer(model_id, batch_id)
+
+
 
 
 

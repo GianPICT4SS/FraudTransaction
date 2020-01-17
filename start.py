@@ -6,9 +6,9 @@ allows to reduce the computation time due to the future input/output operation""
 import argparse
 import logging
 import pandas as pd
-from utils.preprocess_data import build_train
-from utils.config import *
-from sklearn.model_selection import train_test_split
+from src.detector.utils.preprocess_data import build_train
+from src.detector.utils.config import *
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
                     datefmt='%d/%m/%Y %H:%M ',
@@ -33,8 +33,7 @@ def create_folder():
     TRAIN_start.mkdir(exist_ok=True)
     TEST_start.mkdir(exist_ok=True)
     MODELS_start.mkdir(exist_ok=True)
-    #DATA_PROCESSOR_start.mkdir(exist_ok=True)
-    MESSAGE_PATH_start.mkdir(exist_ok=True)
+    MESSAGES_PATH_start.mkdir(exist_ok=True)
 
 def download_data(train_size=0.8):
 
@@ -45,11 +44,6 @@ def download_data(train_size=0.8):
     df_train = df.iloc[:N_train, :]
     df_test = df.iloc[N_train:, :]
 
-    print('before')
-    print(f'dfTrain_shape: {df_train.shape}, dfTest_shape:{df_test.shape}')
-
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=args.seed)
-
     logger.info('Creating train dataset.')
     df_train.to_csv(str(TRAIN_start) + '/df_train.csv', index=False)
     df_test.to_csv(str(TRAIN_start) + '/df_test.csv', index=False)
@@ -59,16 +53,16 @@ def download_data(train_size=0.8):
 
 
 def create_data_processor():
-    logger.info("creating preprocessor...")
+    logger.info("Creating preprocessor...")
 
-    dataprocessor = build_train(str(TRAIN_start/'X_train.csv')) #str(DATA_PROCESSOR_start))
+    dataprocessor = build_train(str(TRAIN_start/'df_train.csv'))
     return dataprocessor
 
 if __name__ == '__main__':
 
     create_folder()
-    #df = download_data()
-    #dataprocessor = create_data_processor()
+    download_data()
+    dataprocessor = create_data_processor()
 
 
 
