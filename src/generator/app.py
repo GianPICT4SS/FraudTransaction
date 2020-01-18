@@ -31,18 +31,19 @@ def start_producer():
         bootstrap_servers=KAFKA_BROKER_URL
  )
 
-    logger.info('Transaction Payload:')
-    for i in range(300):
+
+    for i in range(260):
         transaction = create_random_transaction(df_test)
         producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
         producer.flush()
+        logger.info(f'Transaction Payload: {transaction}')
         #print(transaction)
         #sleep(5)
     logger.info('Start producer finished.')
-    producer.close()
+    #producer.close()
 
 def start_consumer():
-    stop_event = threading.Event()
+
     logger.info('Start Consumer Thread')
     consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
     consumer.subscribe(TOPICS)
@@ -51,11 +52,11 @@ def start_consumer():
         message = json.loads(msg.value)
         if "Prediction" in message:
             logger.info('Prediction message:')
-            #print(f"** CONSUMER: Received prediction {message['Prediction']}")
-            #print(f"Type Transaction: {message['STATUS']}")
+            print(f"** CONSUMER: Received prediction {message['Prediction']}")
+            print(f"Type Transaction: {message['STATUS']}")
     logger.info(f'Closing consumer.')
-    consumer.close()
-    stop_event.set()
+    #consumer.close()
+
 
 
 
@@ -67,6 +68,7 @@ threads.append(t2)
 for thread in threads:
     thread.start()
 
+#TO DO: add a functionality to stop all thread when the dataset is completed.
 
 
 

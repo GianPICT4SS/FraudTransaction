@@ -1,7 +1,7 @@
 """detector app: it must classify a transaction as fraud or normal. The prediction will be send by a producer
 in the message_utils script."""
 
-import time
+
 import json
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
@@ -19,7 +19,7 @@ from kafka import KafkaConsumer
 
 
 
-from model.trainer import Trainer
+#from model.trainer import Trainer
 
 RETRAIN_EVERY = 250
 EXTRA_MODELS_TO_KEEP = 1
@@ -90,7 +90,7 @@ def start(model_id, messages_count, batch_id):
         if is_retraining_message(msg):
             # A new model is available
             model_fname = f'model_{model_id}.pt'
-            model = load_checkpoint(MODELS/model_fname)
+           # model = load_checkpoint(MODELS/model_fname)
             logger.info(f'New model reloaded {model_id}')
 
         elif is_application_message(msg):
@@ -103,7 +103,7 @@ def start(model_id, messages_count, batch_id):
                 # trainer(model_id, batch_id)
                 model_id = (model_id + 1) % (EXTRA_MODELS_TO_KEEP + 1)
                 batch_id += 1
-                Trainer(model_id, batch_id)
+                #Trainer(model_id, batch_id)
 
 
 
