@@ -74,7 +74,8 @@ def predict(message):
     TO DO: make the preprocessor of row"""
 
     df = pd.DataFrame(message)
-    row = df.values
+
+    row = df.iloc[:, :-1].values  # don't take the target.
     row = torch.from_numpy(row).float()
     output = model(row)
     _, predicted = torch.max(output.data, 1)
@@ -94,8 +95,8 @@ def start(model_id, messages_count, batch_id):
 
         elif is_application_message(msg):
             pred = predict(message)  # get the prediction
-            publish_prediction(pred) # publish prediction msg
-            append_message(message, MESSAGES_PATH, batch_id)  # save the transaction in order to increase the train dataset
+            publish_prediction(pred)  # publish prediction msg
+            append_message(message, MESSAGES_PATH, batch_id)  #save the transaction in order to increase the train dataset
             messages_count += 1
             if messages_count % RETRAIN_EVERY == 0:
                 # TO DO: here start the thread trainer, its run method starts the retrain
@@ -112,12 +113,6 @@ def start(model_id, messages_count, batch_id):
 if __name__ == '__main__':
 
 
-    #dataprocessor_id = 0
-    #dataprocessor_fname = f'dataprocessor_{dataprocessor_id}_.p'
-    #path_dp = str(DATA_PROCESSOR) + '/' + dataprocessor_fname
-    #with open(path_dp, 'rb') as f:
-    #    dataprocessor = pickle.load(f)
-    #dataprocessor = sc.pickleFile(dataprocessor_fname)
 
     messages_count = read_messages_count(MESSAGES_PATH, RETRAIN_EVERY)
     batch_id = messages_count % RETRAIN_EVERY
@@ -126,7 +121,7 @@ if __name__ == '__main__':
     model_fname = f'checkpoint_{model_id}.pth'
     model = load_checkpoint(MODELS / model_fname)
     
-    time.sleep(5)
+    #time.sleep(5)
     consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
     consumer.subscribe(TOPICS)
 

@@ -31,7 +31,7 @@ def publish_prediction(pred):
 
 
 
-def publish_traininig_completed(model_id):
+def publish_training_completed(model_id):
     producer.send(RETRAIN_TOPIC,
                   json.dumps({'training_completed': True, 'model_id': model_id}).encode('utf-8'))
     producer.flush()
@@ -49,10 +49,13 @@ def read_messages_count(path, repeat_every):
 
 def append_message(message, path, batch_id):
     logger.info('append msg')
-    message_fname = f'messages_{batch_id}_.csv'
-    df = pd.DataFrame(message)
-    path_msg = path/message_fname
-    df.to_csv(path_msg)
+    message_fname = f'messages_{batch_id}.csv'
+    path_msg = path / message_fname
+    with open(path_msg, "a") as f:
+        f.write("%s\n" % (json.dumps(message)))
+
+    #df = pd.DataFrame(message)
+    #df.to_csv(path_msg)
 
 
 

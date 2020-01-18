@@ -37,7 +37,7 @@ def start_producer():
         producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
         producer.flush()
         print(transaction)
-        sleep(5)
+        #sleep(5)
     logger.info('Start producer finished.')
 
 def start_consumer():
