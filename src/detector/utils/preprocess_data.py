@@ -15,6 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s
 
 logger = logging.getLogger(__name__)
 
+from pyspark import SparkContext
 from pyspark.sql.session import SparkSession
 import pyspark.sql.types as tp
 from pyspark.ml import Pipeline
@@ -27,6 +28,8 @@ warnings.filterwarnings("ignore")
 ###################################################
 # Spark Configuration
 ###################################################
+
+sc = SparkContext()
 
 spark = SparkSession\
     .builder\
@@ -45,13 +48,18 @@ my_schema = tp.StructType([
 
 def load_new_training_data(path):
     data = []
-    with open(path, "r") as f:
-        for line in f:
-            data.append(json.loads(line))
-        df = pd.DataFrame(data)  # so that hasattr(df, columns)
-    return spark.createDataFrame(df)
+    try:
+        with open(path, "r") as f:
+            for line in f:
+                data.append(json.loads(line))
+            #df = pd.DataFrame(data)  # so that hasattr(df, columns)
+            rdd = sc.parallelize(data)
+            return spark.createDataFrame(rdd)
+    except Exception as e:
+        logger.info(str(e))
 
-def build_train(train_path, new_train_path=None): #result_path, dataprocessor_id=0, PATH_2=None):
+
+def build_train(train_path, new_train_path=None):
 
 
     target ='Class'
@@ -59,9 +67,15 @@ def build_train(train_path, new_train_path=None): #result_path, dataprocessor_id
     df = spark.read.format("csv")\
         .options(header='true', inferschema='true')\
         .load(train_path)
+
  # new train data available?
     if new_train_path:
+        logger.info(f'fd.columns: {df.columns}')
+        logger.info(f'df.take(3): {df.take(3)}')
         df_tmp = load_new_training_data(new_train_path)
+        logger.info(f'df_tmp.columns: {df_tmp.columns}')
+        logger.info(f'df_tmp.take(3): {df_tmp.take(3)}')
+
         #in order to be consistent with df
         df_tmp = df_tmp[df.columns]
         # concatenate for a new DataFrame

@@ -13,6 +13,7 @@ services:
 
   detector:
     build: ./src/detector
+
     environment:
       KAFKA_BROKER_URL: broker:9092
       TRANSACTIONS_TOPIC: queueing.transactions

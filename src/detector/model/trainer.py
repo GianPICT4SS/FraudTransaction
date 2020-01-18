@@ -27,7 +27,7 @@ model = FraudNet().float().to(device)
 
 from threading import Thread, Event
 
-"""
+
 class Trainer(Thread):
     
 
@@ -44,10 +44,10 @@ class Trainer(Thread):
         #Method called when the thread start...
         logger.info(f'Retraining for model_id: {self.model_id_}, started.')
         message_name = f'message_{self.batch_id_}.csv'
-        dtrain = build_train(train_path=TRAIN, new_train_path=MESSAGES_PATH/message_name)  # return FeatureTools object
+        new_train_path = str(MESSAGES_PATH) + '/' + message_name
+        dtrain = build_train(train_path=str(TRAIN), new_train_path=new_train_path)  # return FeatureTools object
         train_rdd = dtrain.data  # data already preprocessed
         y_rdd = dtrain.target
         train(model, train_rdd=train_rdd, y_rdd=y_rdd, model_id=self.model_id_, device=device)  # train and save checkpoint
         logger.info('Training phase finisched.')
         publish_training_completed(self.model_id_)
-"""

@@ -27,35 +27,39 @@ N = df_test.shape[0]
 
 def start_producer():
     logger.info('Start producer thread')
-    producer = KafkaProducer(
-        bootstrap_servers=KAFKA_BROKER_URL
- )
+    try:
+        producer = KafkaProducer(
+        bootstrap_servers=KAFKA_BROKER_URL,
+        acks='all')
+    except Exception as e:
+        logger.info(str(e))
 
-
-    for i in range(260):
+    for i in range(N):
         transaction = create_random_transaction(df_test)
         producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
         producer.flush()
-        logger.info(f'Transaction Payload: {transaction}')
-        #print(transaction)
-        #sleep(5)
+        #logger.info(f'Transaction Payload: {transaction}')
+        #sleep(0.5)
     logger.info('Start producer finished.')
-    #producer.close()
+    producer.close()
 
 def start_consumer():
 
     logger.info('Start Consumer Thread')
-    consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
-    consumer.subscribe(TOPICS)
+    try:
+        consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
+        consumer.subscribe(TOPICS)
+    except Exception as e:
+        logger.info(str(e))
 
     for msg in consumer:
         message = json.loads(msg.value)
-        if "Prediction" in message:
-            logger.info('Prediction message:')
-            print(f"** CONSUMER: Received prediction {message['Prediction']}")
-            print(f"Type Transaction: {message['STATUS']}")
+        #if "Prediction" in message:
+            #logger.info('Prediction message:')
+            #print(f"** CONSUMER: Received prediction {message['Prediction']}")
+            #print(f"Type Transaction: {message['STATUS']}")
     logger.info(f'Closing consumer.')
-    #consumer.close()
+    consumer.close()
 
 
 
