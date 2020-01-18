@@ -21,4 +21,4 @@ services:
 networks:
   default:
     external:
-      name: kafka-net
+      name: kafka-net-fraud

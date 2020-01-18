@@ -20,5 +20,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 COPY ./requirements.txt ./
 RUN pip3 install -r requirements.txt
 COPY ./ ./
+RUN chmod -R 777 ./dataset/messages
+
 
 CMD ["python", "app.py"]

@@ -31,8 +31,8 @@ class Trainer(Thread):
     """class Trainer.."""
 
     def __init__(self, model_id, batch_id):
-        Thread.super(self)
-        self.model_id_= model_id
+        Thread.__init__(self)
+        self.model_id_ = model_id
         self.batch_id_ = batch_id
 
         self.stop_event = Event()
