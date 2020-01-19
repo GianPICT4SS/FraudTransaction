@@ -4,10 +4,16 @@ import json
 from time import sleep
 import pandas as pd
 import threading
+import logging
 
 from kafka import KafkaProducer, KafkaConsumer
 from transactions import create_random_transaction
 from config import *
+
+# logger
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
+                    datefmt='%d/%m/%Y %H:%M ',
+                    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +37,19 @@ def start_producer():
         producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER_URL,
         acks='all')
+
+        for i in range(N):
+            transaction = create_random_transaction(df_test)
+            producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
+            producer.flush()
+            # logger.info(f'Transaction Payload: {transaction}')
+            # sleep(0.5)
+        logger.info('Start producer finished.')
+        producer.close()
     except Exception as e:
         logger.info(str(e))
 
-    for i in range(N):
-        transaction = create_random_transaction(df_test)
-        producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
-        producer.flush()
-        #logger.info(f'Transaction Payload: {transaction}')
-        #sleep(0.5)
-    logger.info('Start producer finished.')
-    producer.close()
+
 
 def start_consumer():
 
@@ -49,17 +57,19 @@ def start_consumer():
     try:
         consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
         consumer.subscribe(TOPICS)
+
+        for msg in consumer:
+            message = json.loads(msg.value)
+            if "Prediction" in message:
+                logger.info('Prediction message:')
+                print(f"** CONSUMER: Received prediction {message['Prediction']}")
+                print(f"Type Transaction: {message['STATUS']}")
+        logger.info(f'Closing consumer.')
+        consumer.close()
     except Exception as e:
         logger.info(str(e))
 
-    for msg in consumer:
-        message = json.loads(msg.value)
-        #if "Prediction" in message:
-            #logger.info('Prediction message:')
-            #print(f"** CONSUMER: Received prediction {message['Prediction']}")
-            #print(f"Type Transaction: {message['STATUS']}")
-    logger.info(f'Closing consumer.')
-    consumer.close()
+
 
 
 
@@ -72,7 +82,6 @@ threads.append(t2)
 for thread in threads:
     thread.start()
 
-#TO DO: add a functionality to stop all thread when the dataset is completed.
 
 
 

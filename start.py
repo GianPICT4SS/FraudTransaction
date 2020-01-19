@@ -26,6 +26,7 @@ parser.add_argument('--test_size', type=int, default=0.2,
 args = parser.parse_args()
 
 
+
 def create_folder():
     logger.info('Creating directory structure...')
     GENERATOR_start.mkdir(exist_ok=True)
@@ -57,6 +58,7 @@ def create_data_processor():
 
     dataprocessor = build_train(str(TRAIN_start/'df_train.csv'))
     return dataprocessor
+
 
 if __name__ == '__main__':
 

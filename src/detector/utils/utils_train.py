@@ -7,8 +7,13 @@ writer = SummaryWriter('runs/model_0')
 
 from utils.fraud_net import FraudNet
 from utils.config import MODELS
+from utils.messages_utils import publish_training_completed
 
-
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
+                    datefmt='%d/%m/%Y %H:%M ',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def train(model, train_rdd, y_rdd, model_id, device):
     """train a new model with a dataset more bigger than before and save it on path MODELS/checkpoint_model_id.pth
@@ -69,5 +74,7 @@ def train(model, train_rdd, y_rdd, model_id, device):
                   'state_dict': model.state_dict(),
                   'optimizer': optimizer.state_dict()}
 
-    chechpoint_path = MODELS/f'chechpoint_{model_id}.pth'
+    chechpoint_path = f'./model/models/{model_id}.pth'
     torch.save(checkpoint, chechpoint_path)
+    logger.info('Training phase finisched.')
+    publish_training_completed(model_id)

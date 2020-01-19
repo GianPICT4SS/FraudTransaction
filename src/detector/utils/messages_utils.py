@@ -39,7 +39,7 @@ def publish_training_completed(model_id):
         producer.flush()
         logger.info('PUBLISH TRAINING COMPLETED')
     except Exception as e:
-        logger.info(str(e))
+        logger.exception(str(e))
 
 
 def read_messages_count(path, repeat_every):
@@ -51,16 +51,22 @@ def read_messages_count(path, repeat_every):
         return ((nfiles-1)*repeat_every) + len(file_list[-1].open().readlines())
 
 
-def append_message(message, batch_id):
+def append_message(message):
     #logger.info('append msg')
-    message_fname = f'messages_{batch_id}.txt'
+    message_fname = f'messages.txt'
     path_msg = str(MESSAGES_PATH) + '/' + message_fname
+
+
     try:
-        with open(path_msg, "a") as f:
+        with open(path_msg, "a+") as f:
             f.write("%s\n" % (json.dumps(message)))
             #logger.info('message saved on disk.')
     except Exception as e:
-        logger.info(str(e))
+        logger.exception(str(e))
+
+
+
+
 
 
 

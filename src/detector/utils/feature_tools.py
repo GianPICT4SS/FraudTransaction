@@ -14,15 +14,21 @@ class FeatureTools():
         :param cols: list of columns to be scaled
         :param sc: Standard Scaler (from pyspark.ml.feature, sklearn.preprocessing or similar)
 
-        :return: df: Pandas.DataFrame, sc: trained scaler
+        :return: df: pyspark.sql.dataframe.Dataframe, sc: trained scaler
         """
         #df = df_in.copy()
-        assembler = VectorAssembler().setInputCols(df_in.columns).setOutputCol("features")
+        #assembler = VectorAssembler().setInputCols(df_in.columns).setOutputCol("features")
+        assembler = VectorAssembler(inputCols=df_in.columns, outputCol="features")
         transformed = assembler.transform(df_in)
-        scaledModel = sc.fit(transformed.select("features"))
-        df_scaled = scaledModel.transform(transformed) # TO DO: add possibility to scale only specific features.
+        #scalerModel = sc.fit(transformed.select("features"))
+        scalerModel = sc.fit(transformed)
+        df_scaled = scalerModel.transform(transformed)  # TO DO: add possibility to scale only specific features.
 
-        return df_scaled, scaledModel
+        #df_final = df_scaled.select(df_in.columns, "scaledFeatures").rdd.map(lambda x: x.)
+
+
+
+        return df_scaled, scalerModel
 
     @staticmethod
     def other_():

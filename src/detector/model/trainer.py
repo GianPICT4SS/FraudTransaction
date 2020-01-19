@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 from utils.utils_train import train
 from utils.fraud_net import FraudNet
 from utils.config import TRAIN, MESSAGES_PATH
-from utils.messages_utils import publish_training_completed
+
 
 
 from utils.preprocess_data import build_train
@@ -42,12 +42,13 @@ class Trainer(Thread):
 
     def run(self):
         #Method called when the thread start...
-        logger.info(f'Retraining for model_id: {self.model_id_}, started.')
-        message_name = f'message_{self.batch_id_}.csv'
+        logger.info(f'Retraining for model_id: {self.model_id_}, started with {self.batch_id_}.')
+        message_name = f'messages.txt'
         new_train_path = str(MESSAGES_PATH) + '/' + message_name
-        dtrain = build_train(train_path=str(TRAIN), new_train_path=new_train_path)  # return FeatureTools object
-        train_rdd = dtrain.data  # data already preprocessed
+        print(f'new_train_path {new_train_path}')
+        train_path = str(TRAIN) + '/df_train.csv'
+        dtrain = build_train(train_path=train_path, new_train_path=new_train_path)  # return FeatureTools object
+        train_rdd = dtrain.data.select('scaledFeatures')  # data already preprocessed
         y_rdd = dtrain.target
         train(model, train_rdd=train_rdd, y_rdd=y_rdd, model_id=self.model_id_, device=device)  # train and save checkpoint
-        logger.info('Training phase finisched.')
-        publish_training_completed(self.model_id_)
+
