@@ -32,11 +32,11 @@ $ docker-compose -f docker-compose.kafka.yml logs -f broker | grep "started"
 $ docker-compose up -d
 
 **Shut down**
-To stop the transaction generator and the fraud detector:
+1) To stop the transaction generator and the fraud detector:
 $ docker-compose down
-To stop the Kafka cluster:
+2) To stop the Kafka cluster:
 $ docker-compose -f docker-compose.kafka.tml down
-To remove the Docker network (if you execute this step you will need to recreate the network):
+3) To remove the Docker network (if you execute this step you will need to recreate the network):
 $ docker network rm kafka-net-fraud
 
 N.B: The system has been tested by using a free dataset available on the url: https://www.kaggle.com/mlg-ulb/creditcardfraud
