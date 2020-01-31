@@ -1,7 +1,7 @@
 """Produce fake transactions into a Kafka topic."""
 
 import json
-from time import sleep
+import time
 import pandas as pd
 import threading
 import logging
@@ -43,7 +43,7 @@ def start_producer():
             producer.send(TRANSACTIONS_TOPIC, value=json.dumps(transaction).encode('utf-8'))
             producer.flush()
             # logger.info(f'Transaction Payload: {transaction}')
-            # sleep(0.5)
+            #time.sleep(0.5)
         logger.info('Start producer finished.')
         producer.close()
     except Exception as e:
@@ -64,6 +64,7 @@ def start_consumer():
                 logger.info('Prediction message:')
                 print(f"** CONSUMER: Received prediction {message['Prediction']}")
                 print(f"Type Transaction: {message['STATUS']}")
+            time.sleep(0.5)
         logger.info(f'Closing consumer.')
         consumer.close()
     except Exception as e:

@@ -129,7 +129,7 @@ if __name__ == '__main__':
     model_fname = f'checkpoint_{model_id}.pth'
     model = load_checkpoint(MODELS / model_fname)
     
-    time.sleep(5)
+    time.sleep(2)
     consumer = KafkaConsumer(bootstrap_servers=KAFKA_BROKER_URL)
     consumer.subscribe(TOPICS)
 
