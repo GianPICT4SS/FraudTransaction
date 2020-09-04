@@ -5,8 +5,8 @@ import json
 import logging
 import warnings
 
-from utils.feature_tools import FeatureTools
-from utils.config import COL
+from .feature_tools import FeatureTools
+from .config import COL
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s',
                     datefmt='%d/%m/%Y %H:%M ',
