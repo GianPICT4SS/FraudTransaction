@@ -14,8 +14,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s
 
 logger = logging.getLogger(__name__)
 
-from pyspark import SparkContext
-from pyspark.sql.session import SparkSession
+from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 import pyspark.sql.types as tp
 from pyspark.sql import Row
 from pyspark.ml import Pipeline
@@ -29,8 +29,8 @@ warnings.filterwarnings("ignore")
 ###################################################
 # Spark Configuration
 ###################################################
-
-sc = SparkContext()
+conf = SparkConf().setAppName('FT')
+sc = SparkContext(conf=conf)
 
 spark = SparkSession\
     .builder\
@@ -102,9 +102,11 @@ def build_train(train_path, new_train_path=None):
     target ='Class'
 
     #read initial DataFrame
-    df = spark.read.format("csv")\
-        .options(header='true', inferschema='true')\
-        .load(train_path)
+    #df = spark.read.format("csv")\
+    #    .options(header='true', inferschema='true')\
+    #    .load(train_path)
+    
+    df = spark.read.csv(train_path, header=True, inferSchema=True)
 
 
     # new train data available?
@@ -124,7 +126,7 @@ def build_train(train_path, new_train_path=None):
             df,
             target,
             df.columns,
-            MinMaxScaler(inputCol="features", outputCol='scaledFeatures')
+            MinMaxScaler(inputCol="features", outputCol='scFeatures')
             )
 
 
