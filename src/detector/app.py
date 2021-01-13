@@ -23,7 +23,7 @@ from kafka import KafkaConsumer
 
 from model.trainer import Trainer
 
-RETRAIN_EVERY = 250
+RETRAIN_EVERY = 2500
 EXTRA_MODELS_TO_KEEP = 1
 TOPICS = [TRANSACTIONS_TOPIC, RETRAIN_TOPIC]
 
@@ -89,6 +89,8 @@ def predict(message):
 
 def start(model_id, messages_count, batch_id):
 
+    global model
+
     for msg in consumer:
         message = json.loads(msg.value)
 
@@ -113,14 +115,8 @@ def start(model_id, messages_count, batch_id):
                 batch_id += 1
 
 
-
-
-
-
 if __name__ == '__main__':
-
-
-
+    
     messages_count = read_messages_count(MESSAGES_PATH, RETRAIN_EVERY)
     batch_id = messages_count % RETRAIN_EVERY
 
@@ -134,7 +130,3 @@ if __name__ == '__main__':
     consumer.subscribe(TOPICS)
 
     start(model_id, messages_count, batch_id)
-
-
-
-

@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s : %(message)s
 logger = logging.getLogger(__name__)
 
 def train(model, train_rdd, y_rdd, model_id, device):
-    """train a new model with a dataset more bigger than before and save it on path MODELS/checkpoint_model_id.pth
+    """train a new model with a dataset bigger than before and save it on path MODELS/checkpoint_model_id.pth
     """
     X_train_sc = torch.from_numpy(train_rdd).double().to(device)
     y_train = torch.from_numpy(y_rdd).double().to(device)

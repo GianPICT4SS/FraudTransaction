@@ -41,12 +41,15 @@ class Trainer(Thread):
 
 
     def run(self):
+        log_index = "Trainer(Thread)>"
         #Method called when the thread start...
         logger.info(f'Retraining for model_id: {self.model_id_}, started with {self.batch_id_}.')
         message_name = f'messages.txt'
         new_train_path = str(MESSAGES_PATH) + '/' + message_name
-        print(f'new_train_path {new_train_path}')
+        #print(f'new_train_path {new_train_path}')
+        logger.info(f"{log_index} new_train_path -> {new_train_path}")
         train_path = str(TRAIN) + '/df_train.csv'
+        logger.info(f"{log_index} train_path -> {train_path}")
         dtrain = build_train(train_path=train_path, new_train_path=new_train_path)  # return FeatureTools object
         train_rdd = dtrain.data.select('scaledFeatures')  # data already preprocessed
         y_rdd = dtrain.target
