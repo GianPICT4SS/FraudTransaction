@@ -65,14 +65,6 @@ def append_message(message):
         logger.exception(str(e))
 
 
-
-
-
-
-
-
-
-
 def send_retrain_message(model_id, batch_id):
     logger.info('Send retrain message')
     try:
